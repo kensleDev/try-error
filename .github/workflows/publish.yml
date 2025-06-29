@@ -35,14 +35,21 @@ jobs:
       - name: Run tests (if any)
         run: bun test --if-present
         
-      - name: Publish to NPM
+      - name: Debug info
+        run: |
+          echo "Git ref: ${{ github.ref }}"
+          echo "Git ref type: ${{ github.ref_type }}"
+          echo "Is tag: ${{ startsWith(github.ref, 'refs/tags/') }}"
+          echo "Is main branch: ${{ github.ref == 'refs/heads/main' }}"
+        
+      - name: Publish to NPM (tagged release)
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        if: github.ref_type == 'tag'
+        if: startsWith(github.ref, 'refs/tags/')
         
       - name: Publish to NPM (main branch)
         run: npm publish --tag beta
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        if: github.ref == 'refs/heads/main' && github.ref_type != 'tag' 
+        if: github.ref == 'refs/heads/main' 
