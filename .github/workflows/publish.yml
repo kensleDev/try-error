@@ -32,8 +32,8 @@ jobs:
       - name: Build package
         run: bun run build
         
-      - name: Run tests (if any)
-        run: bun test --if-present
+      - name: Run tests
+        run: bun run test:run
         
       - name: Debug info
         run: |

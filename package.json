@@ -1,6 +1,7 @@
 {
+  "type": "module",
   "name": "@julian-i/try-error",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Elegant tuple-based error handling utilities for TypeScript, inspired by Rust's Result<T, E> pattern.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,11 +20,14 @@
     "build": "tsc",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",
+    "test": "vitest",
+    "test:run": "vitest run",
     "tag": "git tag v$(node -p \"require('./package.json').version\") && git push origin v$(node -p \"require('./package.json').version\")"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
