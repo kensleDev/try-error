@@ -1,6 +1,6 @@
 {
   "name": "@julian-i/try-error",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Elegant tuple-based error handling utilities for TypeScript, inspired by Rust's Result<T, E> pattern.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
