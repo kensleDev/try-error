@@ -36,7 +36,8 @@ import {
   tryFn,
   tryPromise,
   tryCatch,
-  isTrySuccess,
+  isSuccess,
+  isErrorOrNoData,
   getFailureReason,
 } from "@julian-i/try-error";
 
@@ -49,7 +50,7 @@ const safeFetch = tryFn(async (url: string) => {
 
 // Using the wrapped function
 const [data, error] = await safeFetch("https://api.example.com/data");
-if (isTrySuccess([data, error])) {
+if (isSuccess([data, error])) {
   console.log("Success:", data);
 } else {
   console.error("Failed:", getFailureReason([data, error]));
@@ -62,6 +63,13 @@ const [result, err] = await tryPromise(fetch("https://api.example.com/data"));
 const [value, error] = tryCatch(() => {
   return JSON.parse("invalid json");
 });
+
+// Validating API responses
+const [apiResponse, apiError] = await apiCall();
+const validationError = isErrorOrNoData([apiResponse, apiError], "success");
+if (validationError) {
+  console.error("API validation failed:", validationError.message);
+}
 ```
 
 ### Array Processing
@@ -173,20 +181,51 @@ function tryCatch<T>(fn: () => T): TryResult<T>;
 
 ### Utility Functions
 
-#### `isTrySuccess<T>(result)`
+#### `isSuccess<T>(result)`
 
 Type guard to check if a result is successful.
 
 ```typescript
-function isTrySuccess<T>(result: TryResult<T>): result is [T, null];
+function isSuccess<T>(result: TryResult<T>): result is [T, null];
 ```
 
-#### `isTryError<T>(result)`
+#### `isError<T>(result)`
 
 Type guard to check if a result is an error.
 
 ```typescript
-function isTryError<T>(result: TryResult<T>): result is [null, Error];
+function isError<T>(result: TryResult<T>): result is [null, Error];
+```
+
+#### `isErrorOrNoData<T>(result, statusKey?)`
+
+Checks for error conditions or missing data, returning an Error instance or undefined.
+
+```typescript
+function isErrorOrNoData<T>(
+  result: TryResult<T>,
+  statusKey?: string
+): Error | undefined;
+```
+
+This function is useful for validating API responses that might have error states or missing data:
+
+```typescript
+// Check for errors or null data
+const [data, error] = await fetchUserData();
+const validationError = isErrorOrNoData([data, error]);
+if (validationError) {
+  console.error("Validation failed:", validationError.message);
+  return;
+}
+
+// Check for errors or failed status
+const [response, responseError] = await apiCall();
+const statusError = isErrorOrNoData([response, responseError], "success");
+if (statusError) {
+  console.error("API call failed:", statusError.message);
+  return;
+}
 ```
 
 #### `isFailure<T>(result, statusKey?)`

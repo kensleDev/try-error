@@ -3,8 +3,9 @@ import {
   TryResult,
   ensureError,
   getFailureReason,
-  isTryError,
-  isTrySuccess,
+  isError,
+  isErrorOrNoData,
+  isSuccess,
   tryCatch,
   tryFn,
   tryMap,
@@ -114,27 +115,27 @@ describe("tryCatch", () => {
   });
 });
 
-describe("isTrySuccess", () => {
+describe("isSuccess", () => {
   it("should return true for successful result", () => {
     const result: TryResult<string> = ["success", null];
-    expect(isTrySuccess(result)).toBe(true);
+    expect(isSuccess(result)).toBe(true);
   });
 
   it("should return false for error result", () => {
     const result: TryResult<string> = [null, new Error("error")];
-    expect(isTrySuccess(result)).toBe(false);
+    expect(isSuccess(result)).toBe(false);
   });
 });
 
-describe("isTryError", () => {
+describe("isError", () => {
   it("should return true for error result", () => {
     const result: TryResult<string> = [null, new Error("error")];
-    expect(isTryError(result)).toBe(true);
+    expect(isError(result)).toBe(true);
   });
 
   it("should return false for successful result", () => {
     const result: TryResult<string> = ["success", null];
-    expect(isTryError(result)).toBe(false);
+    expect(isError(result)).toBe(false);
   });
 });
 
@@ -239,5 +240,79 @@ describe("tryPipe", () => {
     const pipe = tryPipe((x: number) => x * 2);
     const result = await pipe(5);
     expect(result).toEqual([10, null]);
+  });
+});
+
+describe("isErrorOrNoData", () => {
+  it("should return error for error result", () => {
+    const error = new Error("test error");
+    const result: TryResult<string> = [null, error];
+    const errorOrNoData = isErrorOrNoData(result);
+    expect(errorOrNoData).toBe(error);
+  });
+
+  it("should return 'No data' error for null data", () => {
+    const result: TryResult<string | null> = [null, null];
+    const errorOrNoData = isErrorOrNoData(result);
+    expect(errorOrNoData).toBeInstanceOf(Error);
+    expect(errorOrNoData!.message).toBe("No data");
+  });
+
+  it("should return undefined for successful result with data", () => {
+    const result: TryResult<string> = ["success", null];
+    const errorOrNoData = isErrorOrNoData(result);
+    expect(errorOrNoData).toBeUndefined();
+  });
+
+  it("should return 'No data' error when status key is false", () => {
+    const result: TryResult<{ success: boolean }> = [{ success: false }, null];
+    const errorOrNoData = isErrorOrNoData(result, "success");
+    expect(errorOrNoData).toBeInstanceOf(Error);
+    expect(errorOrNoData!.message).toBe("No data");
+  });
+
+  it("should return 'No data' error when status key is undefined", () => {
+    const result: TryResult<{ status?: boolean }> = [{}, null];
+    const errorOrNoData = isErrorOrNoData(result, "status");
+    expect(errorOrNoData).toBeInstanceOf(Error);
+    expect(errorOrNoData!.message).toBe("No data");
+  });
+
+  it("should return 'No data' error when status key is null", () => {
+    const result: TryResult<{ status: boolean | null }> = [
+      { status: null },
+      null,
+    ];
+    const errorOrNoData = isErrorOrNoData(result, "status");
+    expect(errorOrNoData).toBeInstanceOf(Error);
+    expect(errorOrNoData!.message).toBe("No data");
+  });
+
+  it("should return undefined when status key is true", () => {
+    const result: TryResult<{ success: boolean }> = [{ success: true }, null];
+    const errorOrNoData = isErrorOrNoData(result, "success");
+    expect(errorOrNoData).toBeUndefined();
+  });
+
+  it("should return undefined when status key is truthy", () => {
+    const result: TryResult<{ status: string }> = [{ status: "ok" }, null];
+    const errorOrNoData = isErrorOrNoData(result, "status");
+    expect(errorOrNoData).toBeUndefined();
+  });
+
+  it("should return undefined when no status key is provided and data exists", () => {
+    const result: TryResult<{ success: boolean }> = [{ success: false }, null];
+    const errorOrNoData = isErrorOrNoData(result);
+    expect(errorOrNoData).toBeUndefined();
+  });
+
+  it("should handle nested object status keys", () => {
+    const result: TryResult<{ nested: { status: boolean } }> = [
+      { nested: { status: false } },
+      null,
+    ];
+    const errorOrNoData = isErrorOrNoData(result, "nested.status" as any);
+    expect(errorOrNoData).toBeInstanceOf(Error);
+    expect(errorOrNoData!.message).toBe("No data");
   });
 });

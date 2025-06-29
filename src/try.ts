@@ -33,55 +33,31 @@ export function tryCatch<T>(fn: () => T): TryResult<T> {
   }
 }
 
-export function isTrySuccess<T>(result: TryResult<T>): result is [T, null] {
+export function isSuccess<T>(result: TryResult<T>): result is [T, null] {
   return result[1] === null;
 }
-
-export function isTryError<T>(result: TryResult<T>): result is [null, Error] {
-  return result[0] === null;
-}
-
-// export function isFailure<T>(
-//   result: TryResult<T>,
-//   statusKey?: keyof T | null
-// ): boolean {
-//   const [value, error] = result;
-
-//   // Check for error first
-//   if (error !== null) return true;
-
-//   // Check for null/undefined value
-//   if (value == null) return true;
-
-//   // If statusKey is undefined, default to 'success'. If null, skip status check.
-//   const key = statusKey === undefined ? "success" : statusKey;
-//   if (
-//     key !== null &&
-//     value &&
-//     typeof value === "object" &&
-//     key in value &&
-//     (value as any)[key] === false
-//   ) {
-//     return true;
-//   }
-
-//   return false;
-// }
 
 export function isError<T>(result: TryResult<T>): result is [null, Error] {
   return result[1] !== null;
 }
 
-export function isExhaustiveError<T>(
-  result: TryResult<T>
-): result is [T, null] {
-  if (isError(result)) {
-    return false;
+export function isErrorOrNoData<T>(
+  result: TryResult<T>,
+  statusKey?: string
+): Error | undefined {
+  if (isError(result)) return result[1];
+  if (result[0] === null) return new Error("No data");
+
+  if (statusKey) {
+    const value = result[0]?.[statusKey as keyof T];
+    if (value === false) return new Error("No data");
+    if (value === undefined) return new Error("No data");
+    if (value === null) return new Error("No data");
+
+    return undefined;
   }
 
-  if (result[0] === null) return false;
-
-  return true;
+  return undefined;
 }
 
 export function getFailureReason<T extends { message?: string }>(
