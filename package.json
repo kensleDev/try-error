@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "@julian-i/try-error",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Elegant tuple-based error handling utilities for TypeScript, inspired by Rust's Result<T, E> pattern.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +22,9 @@
     "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:run": "vitest run",
-    "tag": "git tag v$(node -p \"require('./package.json').version\") && git push origin v$(node -p \"require('./package.json').version\")"
+    "tag": "git tag v$(node -p \"require('./package.json').version\") && git push origin v$(node -p \"require('./package.json').version\")",
+    "deploy:beta": "echo \"Have you bumped the version in package.json?\" && read -p \"Press enter to continue...\" && npm run build && npm run test:run && git add . && git commit -m \"chore: deploy beta v$(node -p \"require('./package.json').version\")\" && git push origin main",
+    "deploy:release": "echo \"Have you bumped the version in package.json?\" && read -p \"Press enter to continue...\" && npm run build && npm run test:run && git add . && git commit -m \"chore: release v$(node -p \"require('./package.json').version\")\" && npm run tag"
   },
   "devDependencies": {
     "@types/bun": "latest",
