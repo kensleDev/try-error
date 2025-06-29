@@ -71,3 +71,4 @@ The `.github/workflows/publish.yml` workflow automatically:
 - **Beta releases**: For testing new features and changes
 - **Official releases**: For stable, production-ready versions
 - Both use the same build process to ensure consistency
+-
