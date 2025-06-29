@@ -1,32 +1,32 @@
 {
-	"compilerOptions": {
-		// Enable latest features
-		"lib": ["ESNext", "DOM"],
-		"target": "ES2020",
-		"module": "CommonJS",
-		"moduleDetection": "force",
-		"jsx": "react-jsx",
-		"allowJs": true,
+  "compilerOptions": {
+    // Enable latest features
+    "lib": ["ESNext", "DOM"],
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": true,
 
-		// Output configuration
-		"outDir": "./dist",
-		"declaration": true,
-		"declarationMap": true,
-		"sourceMap": true,
-		"moduleResolution": "node",
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
+    // Output configuration
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
 
-		// Best practices
-		"strict": true,
-		"skipLibCheck": true,
-		"noFallthroughCasesInSwitch": true,
+    // Best practices
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
 
-		// Some stricter flags (disabled by default)
-		"noUnusedLocals": false,
-		"noUnusedParameters": false,
-		"noPropertyAccessFromIndexSignature": false
-	},
-	"include": ["src/**/*", "index.ts"],
-	"exclude": ["node_modules", "dist"]
+    // Some stricter flags (disabled by default)
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false
+  },
+  "include": ["src/**/*", "index.ts"],
+  "exclude": ["node_modules", "dist"]
 }

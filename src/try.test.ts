@@ -3,7 +3,6 @@ import {
   TryResult,
   ensureError,
   getFailureReason,
-  isFailure,
   isTryError,
   isTrySuccess,
   tryCatch,
@@ -136,43 +135,6 @@ describe("isTryError", () => {
   it("should return false for successful result", () => {
     const result: TryResult<string> = ["success", null];
     expect(isTryError(result)).toBe(false);
-  });
-});
-
-describe("isFailure", () => {
-  it("should detect null result as failure", () => {
-    const result: TryResult<string | null> = [null, null];
-    expect(isFailure(result as any)).toBe(true);
-  });
-
-  it("should detect undefined result as failure", () => {
-    const result: TryResult<string | undefined> = [undefined, null];
-    expect(isFailure(result as any)).toBe(true);
-  });
-
-  it("should detect error as failure", () => {
-    const result: TryResult<string> = [null, new Error("error")];
-    expect(isFailure(result)).toBe(true);
-  });
-
-  it("should detect success: false as failure", () => {
-    const result: TryResult<{ success: boolean }> = [{ success: false }, null];
-    expect(isFailure(result)).toBe(true);
-  });
-
-  it("should not detect success: true as failure", () => {
-    const result: TryResult<{ success: boolean }> = [{ success: true }, null];
-    expect(isFailure(result)).toBe(false);
-  });
-
-  it("should use custom status key", () => {
-    const result: TryResult<{ status: boolean }> = [{ status: false }, null];
-    expect(isFailure(result, "status")).toBe(true);
-  });
-
-  it("should handle null status key", () => {
-    const result: TryResult<{ success: boolean }> = [{ success: false }, null];
-    expect(isFailure(result, null)).toBe(false);
   });
 });
 
