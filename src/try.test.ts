@@ -2,12 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   TryResult,
   ensureError,
-  getFailureReason,
-  isFailure,
   isTryError,
-  isTrySuccess,
   tryCatch,
-  tryFn,
   tryMap,
   tryPipe,
   tryPromise,
@@ -38,46 +34,6 @@ describe("ensureError", () => {
     const result = ensureError(obj);
     expect(result).toBeInstanceOf(Error);
     expect(result.message).toBe("Unknown error");
-  });
-});
-
-describe("tryFn", () => {
-  it("should wrap synchronous function successfully", async () => {
-    const fn = (x: number) => x * 2;
-    const wrapped = tryFn(fn);
-    const result = await wrapped(5);
-    expect(result).toEqual([10, null]);
-  });
-
-  it("should wrap asynchronous function successfully", async () => {
-    const fn = async (x: number) => x * 2;
-    const wrapped = tryFn(fn);
-    const result = await wrapped(5);
-    expect(result).toEqual([10, null]);
-  });
-
-  it("should handle synchronous errors", async () => {
-    const fn = (x: number) => {
-      if (x < 0) throw new Error("negative number");
-      return x * 2;
-    };
-    const wrapped = tryFn(fn);
-    const result = await wrapped(-5);
-    expect(result[0]).toBeNull();
-    expect(result[1]).toBeInstanceOf(Error);
-    expect(result[1]!.message).toBe("negative number");
-  });
-
-  it("should handle asynchronous errors", async () => {
-    const fn = async (x: number) => {
-      if (x < 0) throw new Error("negative number");
-      return x * 2;
-    };
-    const wrapped = tryFn(fn);
-    const result = await wrapped(-5);
-    expect(result[0]).toBeNull();
-    expect(result[1]).toBeInstanceOf(Error);
-    expect(result[1]!.message).toBe("negative number");
   });
 });
 
@@ -115,18 +71,6 @@ describe("tryCatch", () => {
   });
 });
 
-describe("isTrySuccess", () => {
-  it("should return true for successful result", () => {
-    const result: TryResult<string> = ["success", null];
-    expect(isTrySuccess(result)).toBe(true);
-  });
-
-  it("should return false for error result", () => {
-    const result: TryResult<string> = [null, new Error("error")];
-    expect(isTrySuccess(result)).toBe(false);
-  });
-});
-
 describe("isTryError", () => {
   it("should return true for error result", () => {
     const result: TryResult<string> = [null, new Error("error")];
@@ -136,68 +80,6 @@ describe("isTryError", () => {
   it("should return false for successful result", () => {
     const result: TryResult<string> = ["success", null];
     expect(isTryError(result)).toBe(false);
-  });
-});
-
-describe("isFailure", () => {
-  it("should detect null result as failure", () => {
-    const result: TryResult<string | null> = [null, null];
-    expect(isFailure(result as any)).toBe(true);
-  });
-
-  it("should detect undefined result as failure", () => {
-    const result: TryResult<string | undefined> = [undefined, null];
-    expect(isFailure(result as any)).toBe(true);
-  });
-
-  it("should detect error as failure", () => {
-    const result: TryResult<string> = [null, new Error("error")];
-    expect(isFailure(result)).toBe(true);
-  });
-
-  it("should detect success: false as failure", () => {
-    const result: TryResult<{ success: boolean }> = [{ success: false }, null];
-    expect(isFailure(result)).toBe(true);
-  });
-
-  it("should not detect success: true as failure", () => {
-    const result: TryResult<{ success: boolean }> = [{ success: true }, null];
-    expect(isFailure(result)).toBe(false);
-  });
-
-  it("should use custom status key", () => {
-    const result: TryResult<{ status: boolean }> = [{ status: false }, null];
-    expect(isFailure(result, "status")).toBe(true);
-  });
-
-  it("should handle null status key", () => {
-    const result: TryResult<{ success: boolean }> = [{ success: false }, null];
-    expect(isFailure(result, null)).toBe(false);
-  });
-});
-
-describe("getFailureReason", () => {
-  it("should return error message for error result", () => {
-    const result: TryResult<string> = [null, new Error("test error")];
-    expect(getFailureReason(result as any)).toBe("test error");
-  });
-
-  it("should return 'No result' for null result", () => {
-    const result: TryResult<string | null> = [null, null];
-    expect(getFailureReason(result as any)).toBe("No result");
-  });
-
-  it("should return message from unsuccessful result", () => {
-    const result: TryResult<{ success: boolean; message: string }> = [
-      { success: false, message: "custom message" },
-      null,
-    ];
-    expect(getFailureReason(result)).toBe("custom message");
-  });
-
-  it("should return 'Unsuccessful result' when no message", () => {
-    const result: TryResult<{ success: boolean }> = [{ success: false }, null];
-    expect(getFailureReason(result as any)).toBe("Unsuccessful result");
   });
 });
 

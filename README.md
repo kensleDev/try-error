@@ -20,48 +20,45 @@ npm install @julian-i/try-error
 
 ## 🔧 Usage Guidelines
 
-- **`tryFn(fn)`** - Use when you want a **reusable wrapper** for a function (sync or async)
-- **`tryPromise(promise)`** - Use for one-off async expressions
-- **`tryCatch(() => syncWork())`** - Use for one-off synchronous expressions
-- **`tryMap(inputs, fn)`** - Use to apply a safe function across an array
+- **`tryPromise(promise)`** - Use for async expressions
+- **`tryCatch(() => syncWork())`** - Use for synchronous expressions
+- **`tryMap(inputs, fn)`** - Use to apply error-safe operations across an array
 - **`tryPipe(...fns)`** - Use to compose a pipeline of safe steps that short-circuit on failure
-- **`isFailure`, `isTrySuccess`, `getFailureReason`** - Use for ergonomic result handling
+- **`isTryError`** - Type guard to check if a result is an error
 
 ## 📖 Examples
 
 ### Basic Usage
 
 ```typescript
-import {
-  tryFn,
-  tryPromise,
-  tryCatch,
-  isTrySuccess,
-  getFailureReason,
-} from "@julian-i/try-error";
+import { tryPromise, tryCatch } from "@julian-i/try-error";
 
-// Wrapping a function for reuse
-const safeFetch = tryFn(async (url: string) => {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return response.json();
-});
+// Async error handling
+const [data, error] = await tryPromise(
+  fetch("https://api.example.com/data").then(r => {
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  })
+);
 
-// Using the wrapped function
-const [data, error] = await safeFetch("https://api.example.com/data");
-if (isTrySuccess([data, error])) {
-  console.log("Success:", data);
-} else {
-  console.error("Failed:", getFailureReason([data, error]));
+if (error) {
+  console.error("Failed:", error.message);
+  return;
 }
 
-// One-off promise handling
-const [result, err] = await tryPromise(fetch("https://api.example.com/data"));
+console.log("Success:", data);
 
 // Synchronous error handling
-const [value, error] = tryCatch(() => {
+const [value, parseError] = tryCatch(() => {
   return JSON.parse("invalid json");
 });
+
+if (parseError) {
+  console.error("Parse failed:", parseError.message);
+  return;
+}
+
+console.log("Parsed:", value);
 ```
 
 ### Array Processing
@@ -114,27 +111,6 @@ if (error) {
 }
 ```
 
-### Advanced Error Handling
-
-```typescript
-import { isFailure, getFailureReason } from "@julian-i/try-error";
-
-// Check for various failure conditions
-const [apiResult, apiError] = await safeApiCall();
-
-if (isFailure([apiResult, apiError])) {
-  // This handles: null/undefined results, thrown errors, or {success: false} objects
-  console.error("Operation failed:", getFailureReason([apiResult, apiError]));
-}
-
-// Custom status key
-const [customResult, customError] = await customApiCall();
-if (isFailure([customResult, customError], "status")) {
-  // Checks for {status: false} in addition to other failure conditions
-  console.error("Custom operation failed");
-}
-```
-
 ## 📚 API Reference
 
 ### Types
@@ -144,16 +120,6 @@ type TryResult<T> = [T, null] | [null, Error];
 ```
 
 ### Core Functions
-
-#### `tryFn<TArgs, TReturn>(fn)`
-
-Creates a reusable wrapper function that returns `TryResult<TReturn>`.
-
-```typescript
-function tryFn<TArgs extends any[], TReturn>(
-  fn: (...args: TArgs) => Promise<TReturn> | TReturn
-): (...args: TArgs) => Promise<TryResult<TReturn>>;
-```
 
 #### `tryPromise<T>(promise)`
 
@@ -173,41 +139,12 @@ function tryCatch<T>(fn: () => T): TryResult<T>;
 
 ### Utility Functions
 
-#### `isTrySuccess<T>(result)`
-
-Type guard to check if a result is successful.
-
-```typescript
-function isTrySuccess<T>(result: TryResult<T>): result is [T, null];
-```
-
 #### `isTryError<T>(result)`
 
 Type guard to check if a result is an error.
 
 ```typescript
 function isTryError<T>(result: TryResult<T>): result is [null, Error];
-```
-
-#### `isFailure<T>(result, statusKey?)`
-
-Checks for various failure conditions including custom status keys.
-
-```typescript
-function isFailure<T extends Record<string, any>>(
-  result: TryResult<T>,
-  statusKey?: keyof T | null
-): boolean;
-```
-
-#### `getFailureReason<T>(result)`
-
-Extracts a human-readable failure reason from a result.
-
-```typescript
-function getFailureReason<T extends { message?: string }>(
-  result: TryResult<T>
-): string | undefined;
 ```
 
 ### Collection Functions
