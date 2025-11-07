@@ -185,6 +185,44 @@ Ensures a value is converted to an Error instance.
 function ensureError(value: unknown): Error;
 ```
 
+## 📋 Changelog
+
+### Version 0.2.0 - Breaking Changes
+
+**Removed Functions:**
+
+The following helper functions have been removed from the library. Direct error checking is more idiomatic and provides better error context:
+
+- **`tryFn(fn)`** - Removed. Use `tryCatch()` for synchronous operations or `tryPromise()` for async operations instead.
+- **`isTrySuccess(result)`** - Removed. Check directly with `if (error)` or `if (!error)` instead.
+- **`getFailureReason(result)`** - Removed. Access the error directly from the tuple: `const [_, error] = result`.
+- **`isFailure(result)`** - Removed. Check directly with `if (error)` instead.
+
+**Migration Guide:**
+
+```typescript
+// Before (v0.1.x)
+const result = tryFn(() => riskyOperation());
+if (isTrySuccess(result)) {
+  // handle success
+} else if (isFailure(result)) {
+  const error = getFailureReason(result);
+  console.error(error);
+}
+
+// After (v0.2.x)
+const [data, error] = tryCatch(() => riskyOperation());
+if (error) {
+  console.error(error);
+} else {
+  // handle success with data
+}
+```
+
+**What's Kept:**
+
+- ✅ `isTryError(result)` - Still available as a useful type guard for TypeScript narrowing
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
